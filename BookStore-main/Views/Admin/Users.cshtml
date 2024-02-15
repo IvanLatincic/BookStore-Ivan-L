@@ -1,0 +1,86 @@
+﻿@model IEnumerable<ApplicationUser>
+
+@{
+    ViewData["Title"] = "Popis svih korisnika";
+}
+
+<h1> Popis svih korisnika </h1>
+
+<form asp-action="Users" asp-controller="Admin" class="col-2 my-1 p-2">
+    <div>
+        <h1>Tražilica</h1>
+        <div class="my-1">
+            <input type="text" name="searchString" placeholder="Unesite naziv ili adresu elektroničke pošte korisnika" class="form-control-sm col-12" />
+        </div>
+        <input type="submit" value="Pretraga" class="btn btn-primary btn-sm" />
+        <a asp-action="Users" class="btn btn-secondary btn-sm float-right">Poništite</a>
+    </div>
+</form>
+
+@if (Model.Any())
+{
+    foreach (var user in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-header">
+                <b>Korisničko ime: </b> @user.UserName
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Email: @user.Email</h5>
+                @if (user.IsBlocked)
+                {
+                    <h5> Korisnik je blokiran </h5>
+                }
+
+                else
+                {
+                    <h5> Aktivan korisnik </h5>
+                }
+                
+            </div>
+            <div class="card-footer">
+                @if (user.IsBlocked)
+                {
+                    <form asp-action="UnblockUser" asp-route-id="@user.Id" method="post">
+                        <button type="submit" class="btn btn-warning">Odblokirajte</button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-action="BlockUser" asp-route-id="@user.Id" method="post">
+                        <button type="submit" class="btn btn-danger">Blokirajte</button>
+                    </form>
+                }
+
+
+                <form asp-action="DeleteUser" asp-route-id="@user.Id" method="post">
+                    <span id="confirmDeleteSpan_@user.Id" style="display:none">
+                        <span> Jeste li sigurni da želite obrisati ovaj korisnički račun?</span>
+                        <button type="submit" class="btn btn-danger">Da</button>
+                        <a href="#" class="btn btn-primary"
+                           onclick="confirmDelete('@user.Id', false)">Ne</a>
+                    </span>
+
+                    <span id="deleteSpan_@user.Id">
+                        <a href="#" class="btn btn-danger"
+                           onclick="confirmDelete('@user.Id', true)">Izbrišite</a>
+                    </span>
+                </form>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="card">
+        <div class="card-header">
+            Trenutno nema registriranih korisnika.
+        </div>
+    </div>
+}
+
+
+
+@section Scripts {
+    <script src="~/js/customjs.js"></script>
+}

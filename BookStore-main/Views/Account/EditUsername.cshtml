@@ -1,0 +1,40 @@
+﻿@using BookStore.Data.ViewModels;
+@model EditUsernameVM
+
+<h2>Edit Username</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Info"] != null)
+{
+    <div class="alert alert-info">
+        @TempData["Info"]
+    </div>
+}
+
+@if (Model != null)
+{
+    <form asp-action="EditUsername" method="post">
+        <div class="form-group">
+            <label asp-for="CurrentUserName">Trenutno korisničko ime:</label>
+            <input asp-for="CurrentUserName" class="form-control" readonly />
+        </div>
+        <div class="form-group">
+            <label asp-for="NewUserName">Novo korisničko ime:</label>
+            <input asp-for="NewUserName" class="form-control" />
+            <span asp-validation-for="NewUserName" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Ažurirajte</button>
+    </form>
+}
+else
+{
+    <p>User not found.</p>
+}
+
+<a asp-controller="Account" asp-action="UserProfile">Vratite se natrag na pregled svog korisničkog računa.</a>

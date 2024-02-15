@@ -1,0 +1,108 @@
+﻿@model IEnumerable<Order>
+
+@{
+    ViewData["Title"] = "Popis svih narudžbi";
+}
+<div class="row">
+    <div class="col-md-8 offset-2">
+        <h2>Sve narudžbe</h2>
+        <hr />
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Oznaka (id) narudžbe</th>
+                    <th>Datum nastanka narudžbe</th>
+                    <th>Stavke</th>
+                    <th>Ukupno</th>
+                    <th>Status narudžbe</th>
+                    @if (User.IsInRole("Admin") && User.Identity.IsAuthenticated)
+                    {
+                        <th>Korisnik</th>
+                    }
+                    <th>Detalji dostave</th>
+                    <th>Narudžba je plaćena</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="align-middle">@item.Id</td>
+                        <td>@item.OrderPlaced</td>
+                        <td class="align-middle">
+                            <ul style="list-style-type:none" class="alert alert-success">
+                                @foreach (var subitem in item.OrderItems)
+                                {
+                                    <li>@subitem.Product.Name - <b class="badge badge-danger rounded-circle"> @subitem.Amount </b> - @subitem.Price.ToString("c")</li>
+                                }
+                            </ul>
+                        </td>
+                        <td class="align-middle">
+                            @item.OrderItems.Select(x=>x.Price * x.Amount).Sum().ToString("c")
+                        </td>
+                        <td> Narudžba je @item.OrderStatus</td>
+                        @if (User.IsInRole("Admin") && User.Identity.IsAuthenticated)
+                        {
+                            <td> @item.User.UserName</td>
+                        }
+                     
+                            <td class="align-middle">
+                                <a asp-controller="Order" asp-action="ShippingInfoDetails" asp-route-id="@item.ShippingInfoId">Detalji...</a>
+                            </td>
+
+                        <td>
+                            @if (item.IsPaid)
+                            {
+                                <span>Da</span>
+                            }
+                            else
+                            {
+                                <span>Ne</span>
+                            }
+                        </td>
+
+
+                        @if (User.IsInRole("Admin") && User.Identity.IsAuthenticated)
+                        {
+                            @if (!item.IsPaid && item.OrderStatus == BookStore.Data.Enums.OrderStatus.Utijeku)
+                            {
+                                <td>
+                                    <form asp-action="OrderPaid" asp-controller="Order" asp-route-id="@item.Id" method="post">
+                                        <input type="hidden" name="orderId" value="@item.Id" />
+                                        <button type="submit" class="btn btn-success">Narudžba je plaćena</button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form asp-action="CancelOrderByAdmin" asp-controller="Order" asp-route-orderId="@item.Id">
+                                        <button type="submit" class="btn btn-danger">Stornirajte narudžbu</button>
+                                    </form>
+                                </td>
+                            }
+
+                        }
+
+
+                        @if (User.IsInRole("User") && User.Identity.IsAuthenticated)
+                        {
+                            @if(item.OrderStatus == BookStore.Data.Enums.OrderStatus.Utijeku && item.IsPaid == false)
+                            {
+                                <td>
+                                    <span>
+                                        <form asp-action="CancelOrder" asp-controller="Order" asp-route-orderId="@item.Id">
+                                            <button type="submit" class="btn btn-danger" onclick="return confirm('Da li ste sigurni da želite otkazati svoju narudžbu?')"> Otkažite svoju narudžbu </button>
+                                        </form>
+                                    </span>
+                                </td>
+                            }
+                       
+                        }
+
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
